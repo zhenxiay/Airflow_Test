@@ -13,7 +13,7 @@ def extract_data_from_url(**kwargs):
     return df
 
 def insert_data_to_postgres(**kwargs):
-    engine = create_engine('postgresql://root:root@localhost:5432/postgres')
+    engine = create_engine('postgresql://root:root@pgdatabase:5432/basket_intelligence')
     engine.connect()
 
     df = extract_data_from_url()
