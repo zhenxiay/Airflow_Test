@@ -34,7 +34,7 @@ with DAG(
     extract_data = PythonOperator(
         task_id='extract_data',
         python_callable=extract_data_from_url,
-        op_kwargs={'url': 'your_data_url.csv'}, #Replace with your data url
+        op_kwargs={'url': 'https://www.basketball-reference.com/leagues/NBA_2025_per_game.html'}, #Replace with your data url
         provide_context=True,
     )
 
