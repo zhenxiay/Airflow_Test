@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 
 def extract_data_from_url(**kwargs):
     url = 'https://www.basketball-reference.com/leagues/NBA_2025_per_game.html'
-    df = pd.html(url)[0]
+    df = pd.read_html(url)[0]
     return df
 
 def insert_data_to_postgres(**kwargs):
