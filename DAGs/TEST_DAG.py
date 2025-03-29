@@ -1,45 +1,73 @@
 from airflow import DAG
-from airflow.providers.http.sensors.http import HttpSensor
-from airflow.providers.sqlserver.operators.sqlserver import MsSqlOperator
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.python import PythonOperator
 from datetime import datetime
 import pandas as pd
-import io
 import requests
+import io
+import psycopg2
+from psycopg2 import extras
 
-def insert_dataframe_to_sql(**kwargs):
+def extract_data_from_url(**kwargs):
+    url = kwargs['url']
+    response = requests.get(url)
+    response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+    df = pd.read_csv(io.StringIO(response.text))
+    return df.to_json(orient='records')
+
+def insert_data_to_postgres(**kwargs):
     import json
-    import pyodbc
+    ti = kwargs['ti']
+    data_json = ti.xcom_pull(task_ids='extract_data')
+    data = json.loads(data_json)
+    df = pd.DataFrame(data)
 
-    df = pd.read_html('https://www.basketball-reference.com/leagues/NBA_2025.html_per_game')[0]
-
-    conn_str = 'DRIVER={ODBC Driver 17 for SQL Server};SERVER=your_server;DATABASE=your_database;UID=your_user;PWD=your_password' #replace with your credentials
-    conn = pyodbc.connect(conn_str)
+    conn_string = "host=your_host dbname=your_dbname user=your_user password=your_password" #replace with your credentials
+    conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
 
-    for index, row in df.iterrows():
-        columns = ', '.join(f'[{col}]' for col in df.columns)
-        placeholders = ', '.join('?' for _ in df.columns)
-        values = tuple(row.values)
-        sql = f"INSERT INTO your_table ({columns}) VALUES ({placeholders})" # Replace with your table name
-        cursor.execute(sql, values)
+    tuples = [tuple(x) for x in df.to_numpy()]
+    cols = ','.join(list(df.columns))
+
+    query = "INSERT INTO %s(%s) VALUES %%s" % ('your_table', cols) #replace with your table name
+    extras.execute_values(cursor, query, tuples)
 
     conn.commit()
+    cursor.close()
     conn.close()
 
-
 with DAG(
-    dag_id='html_to_sql_server',
+    dag_id='ingest_data_to_postgres',
     schedule_interval=None,  # Or a cron schedule, e.g., '0 0 * * *'
-    start_date=datetime(2026, 1, 1),
+    start_date=datetime(2023, 1, 1),
     catchup=False,
-    tags=['example'],
+    tags=['postgres', 'ingestion'],
 ) as dag:
 
-    insert_to_sql_server = PythonOperator(
-        task_id='insert_to_sql_server',
-        python_callable=insert_dataframe_to_sql,
+    create_table = PostgresOperator(
+        task_id='create_table',
+        postgres_conn_id='postgres_default', #Ensure this connection is set in Airflow UI
+        sql="""
+            CREATE TABLE IF NOT EXISTS your_table (
+                col1 VARCHAR,
+                col2 INTEGER,
+                col3 DATE
+                -- Add more columns as needed
+            );
+        """,
+    )
+
+    extract_data = PythonOperator(
+        task_id='extract_data',
+        python_callable=extract_data_from_url,
+        op_kwargs={'url': 'your_data_url.csv'}, #Replace with your data url
         provide_context=True,
     )
 
-    insert_to_sql_server
+    insert_data = PythonOperator(
+        task_id='insert_data',
+        python_callable=insert_data_to_postgres,
+        provide_context=True,
+    )
+
+    create_table >> extract_data >> insert_data
