@@ -1,0 +1,41 @@
+# values.yaml
+
+superset:
+  image:
+    repository: apache/superset
+    tag: latest
+
+  deployment:
+    replicas: 2
+
+    web:
+      resources:
+        requests:
+          cpu: "1"
+          memory: "2Gi"
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+
+    worker:
+      enabled: true # Assuming you have worker containers
+      replicas: 1
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+        limits:
+          cpu: "1"
+          memory: "2Gi"
+
+    initContainers:
+      - name: my-init-container
+        image: busybox:latest
+        command: ["sh", "-c", "echo 'Initializing...'"]
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
