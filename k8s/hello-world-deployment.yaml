@@ -32,6 +32,6 @@ spec:
     app: hello-world
   ports:
     - protocol: TCP
-      port: 80 # Service port
+      port: 8080 # Service port
       targetPort: 80 # Container port
   type: LoadBalancer # Expose the service externally
