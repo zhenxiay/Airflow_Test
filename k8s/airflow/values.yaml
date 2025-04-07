@@ -739,14 +739,13 @@ workers:
        cpu: 100m
        memory: 128Mi
 
-
   resources: 
     limits:
-     cpu: 100m
-     memory: 128Mi
+      cpu: 100m
+      memory: 128Mi
     requests:
-     cpu: 100m
-     memory: 128Mi
+      cpu: 100m
+      memory: 128Mi
 
   # Grace period for tasks to finish after SIGTERM is sent from kubernetes
   terminationGracePeriodSeconds: 600
@@ -826,7 +825,7 @@ workers:
     retentionDays: 15
     # frequency to attempt to groom logs, in minutes
     frequencyMinutes: 15
-    resources: 
+    resources:
       limits:
        cpu: 100m
        memory: 128Mi
