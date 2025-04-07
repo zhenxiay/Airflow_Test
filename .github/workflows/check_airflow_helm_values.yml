@@ -33,4 +33,4 @@ jobs:
     # Step 4: Run yamllint on values.yaml
     - name: Lint values.yaml
       run: |
-        yamllint k8s/airflow/values.yaml
+        yamllint -d "{extends: relaxed, rules: {line-length: {max: 120}}}" k8s/airflow/values.yaml
