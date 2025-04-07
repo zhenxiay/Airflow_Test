@@ -1,0 +1,36 @@
+name: Check Helm Chart values.yaml Syntax
+
+on:
+  push:
+    paths:
+      - "k8s/airflow/values.yaml" # Trigger only when values.yaml files are modified
+  pull_request:
+    paths:
+      - "k8s/airflow/values.yaml" # Trigger on PRs modifying values.yaml files
+  workflow_dispatch:
+
+jobs:
+  lint-values-yaml:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Python (required for yamllint)
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    # Step 3: Install yamllint
+    - name: Install yamllint
+      run: |
+        python -m pip install --upgrade pip
+        pip install yamllint
+
+    # Step 4: Run yamllint on values.yaml
+    - name: Lint values.yaml
+      run: |
+        yamllint k8s/airflow/values.yaml
