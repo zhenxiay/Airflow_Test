@@ -739,7 +739,7 @@ workers:
        cpu: 100m
        memory: 128Mi
 
-  resources: 
+  resources:
     limits:
       cpu: 100m
       memory: 128Mi
@@ -962,7 +962,7 @@ scheduler:
       maxUnavailable: 1
       # minAvailable: 1
 
-  resources: 
+  resources:
     limits:
      cpu: 100m
      memory: 128Mi
