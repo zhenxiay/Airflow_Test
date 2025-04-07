@@ -2884,7 +2884,7 @@ logs:
     # Enable persistent volume for storing logs
     enabled: false
     # Volume size for logs
-    size: 100Gi
+    size: 10Gi
     # Annotations for the logs PVC
     annotations: {}
     # If using a custom storageClass, pass name here
