@@ -715,7 +715,7 @@ workers:
   kerberosSidecar:
     # Enable kerberos sidecar
     enabled: false
-    resources: 
+    resources:
       limits:
        cpu: 100m
        memory: 128Mi
